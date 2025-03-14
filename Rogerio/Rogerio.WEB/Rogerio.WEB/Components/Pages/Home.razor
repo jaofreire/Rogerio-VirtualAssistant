@@ -1,7 +1,74 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@inject IJSRuntime JsRuntime
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Rogério</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Fale com o Rogério</h1>
+@if (isListening)
+{
+    <button class="btn btn-danger" @onclick="Talk">Parar de falar</button>
+}
+else
+{
+    <button class="btn btn-primary" @onclick="Talk">Aperte para falar</button>
+}
 
-Welcome to your new app.
+<div>
+    <p>Pergunta:</p>
+    <p>@question</p>
+</div>
+
+<div>
+    <p>Resposta</p>
+    <p>@answer</p>
+</div>
+
+<script>
+
+    function startListening(dotNetRef){
+        const recognition = new window.webkitSpeechRecognition();
+        recognition.lang = 'pt-BR';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onresult = (e) => {
+            let text = e.results[0][0].transcript;
+            dotNetRef.invokeMethodAsync("ReceiveSpeechText", text);
+            console.log(text);
+        };
+
+        recognition.onerror = (e) => {
+            console.log("Erro ao reconhecer a voz", e.error);
+        }
+
+        recognition.start();
+    }
+
+</script>
+
+@code{
+    private bool isListening = false;
+    private string question = "";
+    private string answer = "";
+
+    private async Task Talk()
+    {
+        isListening = !isListening;
+
+        if (isListening)
+        {
+            var dotNetRef = DotNetObjectReference.Create(this);
+            await JsRuntime.InvokeVoidAsync("startListening", dotNetRef);
+        }
+
+    }
+
+    [JSInvokable]
+    public void ReceiveSpeechText(string questionText)
+    {
+        isListening = false;
+        question = questionText;
+        StateHasChanged();
+    }
+}

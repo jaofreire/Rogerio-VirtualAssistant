@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components.Server;
 using Rogerio.WEB.Client.Pages;
 using Rogerio.WEB.Components;
 
@@ -7,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
+builder.Services.Configure<CircuitOptions>(options => options.DetailedErrors = true);
 
 var app = builder.Build();
 
