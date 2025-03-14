@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35303.130
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rogerio.WEB", "Rogerio.WEB\Rogerio.WEB\Rogerio.WEB.csproj", "{B0F75783-F3DD-47EC-9CAF-70BAC5FD25F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rogerio.WEB.Client", "Rogerio.WEB\Rogerio.WEB.Client\Rogerio.WEB.Client.csproj", "{1944CA59-7C7B-4D1E-8CE3-C32B7127CD63}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B0F75783-F3DD-47EC-9CAF-70BAC5FD25F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0F75783-F3DD-47EC-9CAF-70BAC5FD25F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0F75783-F3DD-47EC-9CAF-70BAC5FD25F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0F75783-F3DD-47EC-9CAF-70BAC5FD25F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1944CA59-7C7B-4D1E-8CE3-C32B7127CD63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1944CA59-7C7B-4D1E-8CE3-C32B7127CD63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1944CA59-7C7B-4D1E-8CE3-C32B7127CD63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1944CA59-7C7B-4D1E-8CE3-C32B7127CD63}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {025C78BB-F257-4B93-B4C9-517BD4AC6987}
+	EndGlobalSection
+EndGlobal
