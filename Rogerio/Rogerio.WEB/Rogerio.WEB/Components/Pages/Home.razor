@@ -1,6 +1,8 @@
 ﻿@page "/"
+@using Rogerio.WEB.Utils
 @rendermode InteractiveServer
 @inject IJSRuntime JsRuntime
+@inject IConfiguration Configuration
 
 <PageTitle>Rogério</PageTitle>
 
@@ -15,12 +17,12 @@ else
 }
 
 <div>
-    <p>Pergunta:</p>
+    <p class="fw-bold">Pergunta:</p>
     <p>@question</p>
 </div>
 
 <div>
-    <p>Resposta</p>
+    <p class="fw-bold">Resposta</p>
     <p>@answer</p>
 </div>
 
@@ -45,12 +47,78 @@ else
         recognition.start();
     }
 
+    function sendTextToGPT(preRequisites, prompt, dotNetRef, apiKey, modelType){
+        const requestBody = {
+            model: modelType,
+            messages : [
+                {
+                    role: "developer",
+                    content: preRequisites
+                },
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ]
+        }
+
+        fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + apiKey
+            },
+            body: JSON.stringify(requestBody)
+        })
+        .then((response) => response.json())
+        .then((jsonData) => {
+            console.log(jsonData);
+            const text = jsonData.choices[0].message.content;
+            dotNetRef.invokeMethodAsync("ReceiveIAReponse", text);
+        })
+        .catch((error) => console.log("Ocorreu um erro ao chamar a API da OpenAI", error))
+    }
+
+
+    function sendTextToGemini(prompt, dotNetRef, apiKey){
+        const requestBody = {
+
+            contents: [{
+                parts: [{text: prompt }]
+            }]
+
+        };
+
+        fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestBody) 
+        })
+            .then((response) => response.json())
+            .then((jsonData) => {
+                console.log(jsonData);
+                const text = jsonData.candidates[0].content.parts[0].text;
+                console.log(text);
+                dotNetRef.invokeMethodAsync("ReceiveIAReponse", text);
+            })
+            .catch((error) => console.log("Ocorreu um erro ao chamar a API da gemini",error)); 
+    }
+
 </script>
 
 @code{
     private bool isListening = false;
     private string question = "";
     private string answer = "";
+
+    private string apiKey = "";
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        apiKey = Configuration["OpenIA:ApiKey"]!;
+    }
 
     private async Task Talk()
     {
@@ -65,10 +133,28 @@ else
     }
 
     [JSInvokable]
-    public void ReceiveSpeechText(string questionText)
+    public async Task ReceiveSpeechText(string questionText)
     {
         isListening = false;
         question = questionText;
+        StateHasChanged();
+
+        await SendTextToIA(questionText);
+    }
+
+    public async Task SendTextToIA(string userPrompt)
+    {
+        string modelType = "gpt-4o-mini";
+        var dotNetRef = DotNetObjectReference.Create(this);
+        var inputPrompt = PromptUtils.GeneratePrompt(userPrompt);
+
+        await JsRuntime.InvokeVoidAsync("sendTextToGPT", [inputPrompt.PreRequisites, inputPrompt.Prompt, dotNetRef, apiKey, modelType]);
+    }
+
+    [JSInvokable]
+    public void ReceiveIAReponse(string response)
+    {
+        answer = response;
         StateHasChanged();
     }
 }
