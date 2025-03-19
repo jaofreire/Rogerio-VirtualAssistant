@@ -1,8 +1,9 @@
 ﻿@page "/"
-@using Rogerio.WEB.Utils
+@using System.Text.Json
 @rendermode InteractiveServer
 @inject IJSRuntime JsRuntime
 @inject IConfiguration Configuration
+@inject IWeatherAPIIntegration WeatherAPIIntegration
 
 <PageTitle>Rogério</PageTitle>
 
@@ -59,10 +60,16 @@ else
                     role: "user",
                     content: prompt
                 }
+            ],
+            functions: [
+                {
+                    name: "bom_dia",
+                    description: "Será chamado quando o prompt do usuário tiver algo relacionado a 'Bom dia, Rogério'"
+                }
             ]
         }
 
-        fetch("https://api.openai.com/v1/chat/completions", {
+         fetch("https://api.openai.com/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -71,8 +78,17 @@ else
             body: JSON.stringify(requestBody)
         })
         .then((response) => response.json())
-        .then((jsonData) => {
+        .then(async (jsonData) => {
             console.log(jsonData);
+
+            if (jsonData.choices[0].message.function_call) {
+                const functionCall = jsonData.choices[0].message.function_call;
+
+                if (functionCall.name === "bom_dia") {
+                   await dotNetRef.invokeMethodAsync("BomDiaCallFunction");
+                }
+            }
+
             const text = jsonData.choices[0].message.content;
             dotNetRef.invokeMethodAsync("ReceiveIAReponse", text);
         })
@@ -117,7 +133,7 @@ else
 
     protected override void OnAfterRender(bool firstRender)
     {
-        apiKey = Configuration["OpenIA:ApiKey"]!;
+        apiKey = Configuration["OpenIA:ApiKey"]!;    
     }
 
     private async Task Talk()
@@ -139,16 +155,17 @@ else
         question = questionText;
         StateHasChanged();
 
-        await SendTextToIA(questionText);
+        var inputPrompt = PromptUtils.GeneratePrompt(questionText);
+
+        await SendTextToIA(inputPrompt.PreRequisites, inputPrompt.Prompt);
     }
 
-    public async Task SendTextToIA(string userPrompt)
+    public async Task SendTextToIA(string preRequisites, string userPrompt)
     {
         string modelType = "gpt-4o-mini";
         var dotNetRef = DotNetObjectReference.Create(this);
-        var inputPrompt = PromptUtils.GeneratePrompt(userPrompt);
 
-        await JsRuntime.InvokeVoidAsync("sendTextToGPT", [inputPrompt.PreRequisites, inputPrompt.Prompt, dotNetRef, apiKey, modelType]);
+        await JsRuntime.InvokeVoidAsync("sendTextToGPT", [preRequisites, userPrompt, dotNetRef, apiKey, modelType]);
     }
 
     [JSInvokable]
@@ -156,5 +173,15 @@ else
     {
         answer = response;
         StateHasChanged();
+    }
+
+    [JSInvokable]
+    public async Task BomDiaCallFunction()
+    {
+        var currentWeatherResponse = await WeatherAPIIntegration.GetCurrentWeather("Recife");
+        string jsonReponse = JsonSerializer.Serialize(currentWeatherResponse);
+
+        var inputPrompt = PromptUtils.GenerateBomdiaCallFunctionPrompt(jsonReponse);
+        await SendTextToIA(inputPrompt.PreRequisites, inputPrompt.Prompt);
     }
 }
