@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Components.Server;
+using Refit;
 using Rogerio.WEB.Client.Pages;
 using Rogerio.WEB.Components;
+using Rogerio.WEB.Integrations.Interfaces;
+using Rogerio.WEB.Integrations.Refit;
+using Rogerio.WEB.Integrations.WeatherAPI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +14,13 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
 builder.Services.Configure<CircuitOptions>(options => options.DetailedErrors = true);
+
+builder.Services.AddRefitClient<IWeatherAPIIntegrationRefit>().ConfigureHttpClient(c =>
+{
+    c.BaseAddress = new Uri("http://api.weatherapi.com/v1/");
+});
+
+builder.Services.AddScoped<IWeatherAPIIntegration, WeatherAPIIntegration>();
 
 var app = builder.Build();
 

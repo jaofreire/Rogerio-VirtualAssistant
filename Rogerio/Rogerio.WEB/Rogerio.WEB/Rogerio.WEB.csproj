@@ -9,6 +9,13 @@
   <ItemGroup>
     <ProjectReference Include="..\Rogerio.WEB.Client\Rogerio.WEB.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.8" />
+    <PackageReference Include="Refit" Version="8.0.0" />
+    <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
+    <PackageReference Include="Refit.Newtonsoft.Json" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Integrations\OpenAI\" />
   </ItemGroup>
 
 </Project>
