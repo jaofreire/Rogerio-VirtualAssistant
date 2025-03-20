@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components.Server;
 using Refit;
 using Rogerio.WEB.Client.Pages;
 using Rogerio.WEB.Components;
+using Rogerio.WEB.Integrations.ElevenLabsApi;
 using Rogerio.WEB.Integrations.Interfaces;
 using Rogerio.WEB.Integrations.Refit;
 using Rogerio.WEB.Integrations.WeatherAPI;
@@ -20,7 +21,13 @@ builder.Services.AddRefitClient<IWeatherAPIIntegrationRefit>().ConfigureHttpClie
     c.BaseAddress = new Uri("http://api.weatherapi.com/v1/");
 });
 
+builder.Services.AddRefitClient<IElevenLabsApiIntegrationRefit>().ConfigureHttpClient(c =>
+{
+    c.BaseAddress = new Uri("https://api.elevenlabs.io/");
+});
+
 builder.Services.AddScoped<IWeatherAPIIntegration, WeatherAPIIntegration>();
+builder.Services.AddScoped<IElevenLabsApiIntegration, ElevenLabsApiIntegration>();
 
 var app = builder.Build();
 

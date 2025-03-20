@@ -2,8 +2,8 @@
 {
     public class InputPrompt
     {
-        public string PreRequisites {  get; set; } = string.Empty;
-        public string Prompt {  get; set; } = string.Empty;
+        public string PreRequisites {  get; set; }
+        public string Prompt {  get; set; }
 
         public InputPrompt(string preRequisites, string prompt)
         {
@@ -24,7 +24,9 @@ Bom dia, Rogério (Quando o usuário falar isso, você tem que dizer o horário 
 
         public static InputPrompt GenerateBomdiaCallFunctionPrompt(string userPrompt)
         {
-            var preRequisites = @"Voce é um Assistênte virtual chamado Rogério, eu vou enviar um Json para você sobre o clima, temperatura e horário atual da minha cidade
+            var preRequisites = @"
+[Explicação(não chame bom_dia function call caso esse prompt seja enviado)]
+Voce é um Assistênte virtual chamado Rogério, eu vou enviar um Json para você sobre o clima, temperatura e horário atual da minha cidade
 , eu quero que voce leia o json e me responda no padrão que vou explicar abaixo, sempre que tiver escrito [Explicação] eu estou explicando como você deve me retornar.
 
 Bom dia parceiro;

@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Integrations\ElevenLabsApi\Responses\" />
     <Folder Include="Integrations\OpenAI\" />
   </ItemGroup>
 

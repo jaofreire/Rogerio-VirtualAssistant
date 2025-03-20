@@ -4,6 +4,7 @@
 @inject IJSRuntime JsRuntime
 @inject IConfiguration Configuration
 @inject IWeatherAPIIntegration WeatherAPIIntegration
+@inject IElevenLabsApiIntegration ElevenLabsApiIntegration
 
 <PageTitle>Rogério</PageTitle>
 
@@ -78,14 +79,14 @@ else
             body: JSON.stringify(requestBody)
         })
         .then((response) => response.json())
-        .then(async (jsonData) => {
+        .then((jsonData) => {
             console.log(jsonData);
 
             if (jsonData.choices[0].message.function_call) {
                 const functionCall = jsonData.choices[0].message.function_call;
 
                 if (functionCall.name === "bom_dia") {
-                   await dotNetRef.invokeMethodAsync("BomDiaCallFunction");
+                   dotNetRef.invokeMethodAsync("BomDiaCallFunction");
                 }
             }
 
@@ -120,6 +121,22 @@ else
                 dotNetRef.invokeMethodAsync("ReceiveIAReponse", text);
             })
             .catch((error) => console.log("Ocorreu um erro ao chamar a API da gemini",error)); 
+    }
+
+    function playBase64Audio(base64String){
+        const audioData = atob(base64String);
+        const arrayBuffer = new ArrayBuffer(audioData.length);
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        for (let i = 0; i < audioData.length; i++) {
+            uint8Array[i] = audioData.charCodeAt(i);
+        }
+
+        const blob = new Blob([uint8Array], { type: "audio/mpeg" });
+        const audioUrl = URL.createObjectURL(blob);
+
+        const audio = new Audio(audioUrl);
+        audio.play();
     }
 
 </script>
@@ -169,9 +186,13 @@ else
     }
 
     [JSInvokable]
-    public void ReceiveIAReponse(string response)
+    public async Task ReceiveIAReponse(string response)
     {
         answer = response;
+        var base64Audio = await ElevenLabsApiIntegration.TextToSpeech(response);
+        if(base64Audio != "")
+            await JsRuntime.InvokeVoidAsync("playBase64Audio", base64Audio);
+        
         StateHasChanged();
     }
 
